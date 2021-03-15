@@ -2,8 +2,9 @@ import "https://deno.land/x/lodash@4.17.19/dist/lodash.js";
 import * as path from "https://deno.land/std@0.90.0/path/mod.ts";
 import { exists } from "https://deno.land/std@0.90.0/fs/mod.ts";
 import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
-import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
 import { parse as flags } from "https://deno.land/std@0.90.0/flags/mod.ts";
+import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
+import { readLines } from "https://deno.land/std@0.90.0/io/mod.ts";
 import { start } from "https://deno.land/x/denops_std@v0.3/mod.ts";
 const _ = (self as any)._;
 
@@ -87,7 +88,19 @@ start(async (vim) => {
       const cmd = [tool.cmd, ...toolArg, pattern] as string[];
       const cwd = (await vim.call("getcwd")) as string;
       clog({ cmd, cwd });
-      const p = Deno.run({ cmd, cwd, stderr: "piped", stdout: "piped" });
+      const p = Deno.run({ cmd, cwd, stdout: "piped", stderr: "piped" });
+
+      await vim.call("setqflist", [], "r");
+      await vim.call("setqflist", [], "a", {
+        title: `[Search results for ${pattern}]`,
+      });
+      await vim.execute("botright copen");
+
+      for await (const line of readLines(p.stdout)) {
+        clog({ line });
+        await vim.call("setqflist", [], "a", { lines: [line] });
+      }
+
       const [status, stdoutArray, stderrArray] = await Promise.all([
         p.status(),
         p.output(),
@@ -98,12 +111,6 @@ start(async (vim) => {
       p.close();
 
       clog({ status, stdout, stderr });
-      await vim.call("setqflist", [], "r");
-      await vim.call("setqflist", [], "a", {
-        title: `[Search results for ${pattern}]`,
-      });
-      await vim.call("setqflist", [], "a", { lines: stdout.split("\n") });
-      await vim.execute("botright copen");
       return await Promise.resolve();
     },
   });
