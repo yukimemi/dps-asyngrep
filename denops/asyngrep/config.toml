@@ -1,7 +1,7 @@
 [[tool]]
 name = "ripgrep"
 cmd = "rg"
-arg = ["-i", "--vimgrep", "--no-heading", "--hidden", "--no-ignore", "--regexp"]
+arg = ["-i", "--vimgrep", "--no-heading"]
 
 [[tool]]
 name = "jvgrep"
@@ -11,5 +11,5 @@ arg = ["-i", "--no-color", "-I", "-R", "-8"]
 [[tool]]
 name = "pt"
 cmd = "pt"
-arg = ["-i", "--nogroup", "--nocolor", "--smart-case", "--skip-vcs-ignores", "--hidden"]
+arg = ["-i", "--nogroup", "--nocolor"]
 
