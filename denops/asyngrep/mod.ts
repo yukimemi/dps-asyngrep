@@ -5,10 +5,8 @@ import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
 import { parse as flags } from "https://deno.land/std@0.90.0/flags/mod.ts";
 import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
 import { readLines } from "https://deno.land/std@0.90.0/io/mod.ts";
-import { start } from "https://deno.land/x/denops_std@v0.3/mod.ts";
+import { start } from "https://deno.land/x/denops_std@v0.4/mod.ts";
 const _ = (self as any)._;
-
-let debug = false;
 
 type Tool = {
   name: string;
@@ -16,19 +14,14 @@ type Tool = {
   arg: string[];
 };
 
-const clog = (...data: any[]): void => {
-  if (debug) {
-    console.log(...data);
-  }
-};
-
 start(async (vim) => {
   // debug.
-  try {
-    debug = await vim.g.get("asyngrep_debug");
-  } catch (e) {
-    // console.log(e);
-  }
+  const debug = await vim.g.get("asyngrep_debug", false);
+  const clog = (...data: any[]): void => {
+    if (debug) {
+      console.log(...data);
+    }
+  };
 
   const pathname = new URL(".", import.meta.url).pathname;
   const dir = isWindows ? pathname.slice(1) : pathname;
@@ -36,15 +29,10 @@ start(async (vim) => {
   let cfg = parse(await Deno.readTextFile(toml));
 
   // User config.
-  let userToml = (await vim.call("expand", "~/.asyngrep.toml")) as string;
-  try {
-    userToml = (await vim.call(
-      "expand",
-      (await vim.g.get("asyngrep_cfg_path")) as string
-    )) as string;
-  } catch (e) {
-    // clog(e);
-  }
+  const userToml = (await vim.call(
+    "expand",
+    (await vim.g.get("asyngrep_cfg_path", "~/.asyngrep.toml")) as string
+  )) as string;
   clog(`g:asyngrep_cfg_path = ${userToml}`);
   if (await exists(userToml)) {
     clog(`Merge user config: ${userToml}`);
