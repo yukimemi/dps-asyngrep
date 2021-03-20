@@ -88,7 +88,7 @@ start(async (vim) => {
       const cmd = [tool.cmd, ...toolArg, pattern] as string[];
       const cwd = (await vim.call("getcwd")) as string;
       clog({ cmd, cwd });
-      const p = Deno.run({ cmd, cwd, stdout: "piped", stderr: "piped" });
+      const p = Deno.run({ cmd, cwd, stdin: "null", stdout: "piped", stderr: "piped" });
 
       await vim.call("setqflist", [], "r");
       await vim.call("setqflist", [], "a", {
