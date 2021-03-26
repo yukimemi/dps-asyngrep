@@ -86,7 +86,7 @@ start(async (vim) => {
 
       await vim.call("setqflist", [], "r");
       await vim.call("setqflist", [], "a", {
-        title: `[Search results for ${pattern}]`,
+        title: `[Search results for ${pattern} on ${tool.name}]`,
       });
       await vim.execute("botright copen");
 
