@@ -1,4 +1,4 @@
-import "https://deno.land/x/lodash@4.17.19/dist/lodash.js";
+import * as _ from "https://cdn.pika.dev/lodash-es";
 import * as path from "https://deno.land/std@0.90.0/path/mod.ts";
 import { exists } from "https://deno.land/std@0.90.0/fs/mod.ts";
 import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
@@ -6,7 +6,6 @@ import { parse as flags } from "https://deno.land/std@0.90.0/flags/mod.ts";
 import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
 import { readLines } from "https://deno.land/std@0.90.0/io/mod.ts";
 import { start } from "https://deno.land/x/denops_std@v0.4/mod.ts";
-const _ = (self as any)._;
 
 type Tool = {
   name: string;
@@ -51,6 +50,8 @@ start(async (vim) => {
   const def = tools.find((x) => x.name === "default") ?? executable;
   clog({ def });
 
+  let p: Deno.Process;
+
   vim.register({
     async asyngrep(...args: unknown[]): Promise<unknown> {
       clog({ args });
@@ -75,8 +76,15 @@ start(async (vim) => {
       const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
       const cwd = (await vim.call("getcwd")) as string;
       const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
+      clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
+      try {
+        clog("kill process");
+        p.close();
+      } catch (e) {
+        clog(e);
+      }
       clog({ cmd, cwd });
-      const p = Deno.run({
+      p = Deno.run({
         cmd,
         cwd,
         stdin: "null",
@@ -84,6 +92,7 @@ start(async (vim) => {
         stderr: "piped",
       });
 
+      clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
       await vim.call("setqflist", [], "r");
       await vim.call("setqflist", [], "a", {
         title: `[Search results for ${pattern} on ${tool.name}]`,
