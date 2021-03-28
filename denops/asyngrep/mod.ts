@@ -26,6 +26,7 @@ start(async (vim) => {
   const dir = isWindows ? pathname.slice(1) : pathname;
   const toml = path.join(dir, "config.toml");
   let cfg = parse(await Deno.readTextFile(toml));
+  clog({ cfg });
 
   // User config.
   const userToml = (await vim.call(
@@ -35,7 +36,12 @@ start(async (vim) => {
   clog(`g:asyngrep_cfg_path = ${userToml}`);
   if (await exists(userToml)) {
     clog(`Merge user config: ${userToml}`);
-    cfg = { ...cfg, ...parse(await Deno.readTextFile(userToml)) };
+    cfg = {
+      tool: [
+        ...(cfg.tool as Tool[]),
+        ...(parse(await Deno.readTextFile(userToml)).tool as Tool[]),
+      ],
+    };
   }
 
   cfg = cfg as Record<string, Tool[]>;
@@ -78,7 +84,7 @@ start(async (vim) => {
       const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
       clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
       try {
-        clog("kill process");
+        clog("close process");
         p.close();
       } catch (e) {
         clog(e);
@@ -95,7 +101,7 @@ start(async (vim) => {
       clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
       await vim.call("setqflist", [], "r");
       await vim.call("setqflist", [], "a", {
-        title: `[Search results for ${pattern} on ${tool.name}]`,
+        title: `[Search results for ${pattern} on ${tool.cmd}]`,
       });
       await vim.execute("botright copen");
 
