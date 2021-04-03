@@ -1,4 +1,4 @@
-import * as _ from "https://cdn.pika.dev/lodash-es";
+import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
 import * as path from "https://deno.land/std@0.90.0/path/mod.ts";
 import { exists } from "https://deno.land/std@0.90.0/fs/mod.ts";
 import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
