@@ -5,7 +5,7 @@ import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
 import { parse as flags } from "https://deno.land/std@0.90.0/flags/mod.ts";
 import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
 import { readLines } from "https://deno.land/std@0.90.0/io/mod.ts";
-import { start } from "https://deno.land/x/denops_std@v0.4/mod.ts";
+import { start } from "https://deno.land/x/denops_std@v0.7/mod.ts";
 
 type Tool = {
   name: string;
