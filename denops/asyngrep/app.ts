@@ -5,7 +5,7 @@ import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
 import { parse as flags } from "https://deno.land/std@0.90.0/flags/mod.ts";
 import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
 import { readLines } from "https://deno.land/std@0.90.0/io/mod.ts";
-import { start } from "https://deno.land/x/denops_std@v0.7/mod.ts";
+import { main } from "https://deno.land/x/denops_std@v0.8/mod.ts";
 
 type Tool = {
   name: string;
@@ -13,7 +13,7 @@ type Tool = {
   arg: string[];
 };
 
-start(async (vim) => {
+main(async ({ vim }) => {
   // debug.
   const debug = await vim.g.get("asyngrep_debug", false);
   const clog = (...data: any[]): void => {
