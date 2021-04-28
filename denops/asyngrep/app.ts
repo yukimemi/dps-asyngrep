@@ -1,10 +1,9 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as path from "https://deno.land/std@0.90.0/path/mod.ts";
-import { exists } from "https://deno.land/std@0.90.0/fs/mod.ts";
-import { isWindows } from "https://deno.land/std@0.90.0/_util/os.ts";
-import { parse as flags } from "https://deno.land/std@0.90.0/flags/mod.ts";
-import { parse } from "https://deno.land/std@0.90.0/encoding/toml.ts";
-import { readLines } from "https://deno.land/std@0.90.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.95.0/path/mod.ts";
+import { exists } from "https://deno.land/std@0.95.0/fs/mod.ts";
+import { parse as flags } from "https://deno.land/std@0.95.0/flags/mod.ts";
+import { parse } from "https://deno.land/std@0.95.0/encoding/toml.ts";
+import { readLines } from "https://deno.land/std@0.95.0/io/mod.ts";
 import { main } from "https://deno.land/x/denops_std@v0.8/mod.ts";
 
 type Tool = {
@@ -22,8 +21,8 @@ main(async ({ vim }) => {
     }
   };
 
-  const pathname = new URL(".", import.meta.url).pathname;
-  const dir = isWindows ? pathname.slice(1) : pathname;
+  const pathname = new URL(".", import.meta.url);
+  const dir = path.fromFileUrl(pathname);
   const toml = path.join(dir, "config.toml");
   let cfg = parse(await Deno.readTextFile(toml));
   clog({ cfg });
