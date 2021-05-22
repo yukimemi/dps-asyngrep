@@ -1,10 +1,4 @@
-import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as path from "https://deno.land/std@0.95.0/path/mod.ts";
-import { exists } from "https://deno.land/std@0.95.0/fs/mod.ts";
-import { parse as flags } from "https://deno.land/std@0.95.0/flags/mod.ts";
-import { parse } from "https://deno.land/std@0.95.0/encoding/toml.ts";
-import { readLines } from "https://deno.land/std@0.95.0/io/mod.ts";
-import { main } from "https://deno.land/x/denops_std@v0.8/mod.ts";
+import { _, flags, fs, io, main, path, toml } from "./deps.ts";
 
 type Tool = {
   name: string;
@@ -23,22 +17,22 @@ main(async ({ vim }) => {
 
   const pathname = new URL(".", import.meta.url);
   const dir = path.fromFileUrl(pathname);
-  const toml = path.join(dir, "config.toml");
-  let cfg = parse(await Deno.readTextFile(toml));
+  const config = path.join(dir, "config.toml");
+  let cfg = toml.parse(await Deno.readTextFile(config));
   clog({ cfg });
 
   // User config.
   const userToml = (await vim.call(
     "expand",
-    (await vim.g.get("asyngrep_cfg_path", "~/.asyngrep.toml")) as string
+    (await vim.g.get("asyngrep_cfg_path", "~/.asyngrep.toml")) as string,
   )) as string;
   clog(`g:asyngrep_cfg_path = ${userToml}`);
-  if (await exists(userToml)) {
+  if (await fs.exists(userToml)) {
     clog(`Merge user config: ${userToml}`);
     cfg = {
       tool: [
         ...(cfg.tool as Tool[]),
-        ...(parse(await Deno.readTextFile(userToml)).tool as Tool[]),
+        ...(toml.parse(await Deno.readTextFile(userToml)).tool as Tool[]),
       ],
     };
   }
@@ -50,7 +44,7 @@ main(async ({ vim }) => {
   // Set default name.
   const tools = cfg.tool as Tool[];
   const executable = tools.find(
-    async (x) => (await vim.call("executable", x.cmd)) as boolean
+    async (x) => (await vim.call("executable", x.cmd)) as boolean,
   );
   const def = tools.find((x) => x.name === "default") ?? executable;
   clog({ def });
@@ -61,11 +55,10 @@ main(async ({ vim }) => {
     async asyngrep(...args: unknown[]): Promise<unknown> {
       clog({ args });
       const arg = args as string[];
-      const a = flags(arg);
-      const pattern =
-        a._.length > 0
-          ? a._.join(" ")
-          : await vim.call("input", "Search for pattern: ");
+      const a = flags.parse(arg);
+      const pattern = a._.length > 0
+        ? a._.join(" ")
+        : await vim.call("input", "Search for pattern: ");
       const tool = a.tool ? tools.find((x) => x.name === a.tool) : def;
       clog({ pattern });
       clog({ tool });
@@ -74,7 +67,7 @@ main(async ({ vim }) => {
         return await Promise.resolve();
       }
       const userArg = arg.filter(
-        (x) => ![...a._, `--tool=${tool.name}`].includes(x)
+        (x) => ![...a._, `--tool=${tool.name}`].includes(x),
       );
       clog({ userArg });
 
@@ -104,7 +97,7 @@ main(async ({ vim }) => {
       });
       await vim.execute("botright copen");
 
-      for await (const line of readLines(p.stdout)) {
+      for await (const line of io.readLines(p.stdout)) {
         clog({ line });
         await vim.call("setqflist", [], "a", { lines: [line] });
       }
