@@ -67,76 +67,73 @@ export async function main(denops: Denops): Promise<void> {
   let p: Deno.Process;
 
   denops.dispatcher = {
-    // deno-lint-ignore require-await
     async asyngrep(...args: unknown[]): Promise<void> {
-      (async () => {
-        try {
-          clog({ args });
-          const arg = args as string[];
-          const a = flags.parse(arg);
-          const pattern = a._.length > 0
-            ? a._.join(" ")
-            : await fn.input(denops, "Search for pattern: ");
-          const tool = a.tool ? tools.find((x) => x.name === a.tool) : def;
-          clog({ pattern });
-          clog({ tool });
-          if (!tool) {
-            console.warn(`Grep tool is not found !`);
-            return;
-          }
-          const userArg = arg.filter(
-            (x) => ![...a._, `--tool=${tool.name}`].includes(x),
-          );
-          clog({ userArg });
-
-          const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
-          const cwd = (await denops.call("getcwd")) as string;
-          const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
-          clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
-          try {
-            clog("close process");
-            p.close();
-          } catch (e) {
-            clog(e);
-          }
-          clog({ cmd, cwd });
-          p = Deno.run({
-            cmd,
-            cwd,
-            stdin: "null",
-            stdout: "piped",
-            stderr: "piped",
-          });
-
-          clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
-          await fn.setqflist(denops, [], "r");
-          await fn.setqflist(denops, [], "a", {
-            title: `[Search results for ${pattern} on ${tool.cmd}]`,
-          });
-          await denops.cmd("botright copen");
-
-          if (p.stdout === null) {
-            return;
-          }
-          for await (const line of io.readLines(p.stdout)) {
-            clog({ line });
-            await fn.setqflist(denops, [], "a", { lines: [line] });
-          }
-
-          const [status, stdoutArray, stderrArray] = await Promise.all([
-            p.status(),
-            p.output(),
-            p.stderrOutput(),
-          ]);
-          const stdout = new TextDecoder().decode(stdoutArray);
-          const stderr = new TextDecoder().decode(stderrArray);
-          p.close();
-
-          clog({ status, stdout, stderr });
-        } catch (e) {
-          console.log(e);
+      try {
+        clog({ args });
+        const arg = args as string[];
+        const a = flags.parse(arg);
+        const pattern = a._.length > 0
+          ? a._.join(" ")
+          : await fn.input(denops, "Search for pattern: ");
+        const tool = a.tool ? tools.find((x) => x.name === a.tool) : def;
+        clog({ pattern });
+        clog({ tool });
+        if (!tool) {
+          console.warn(`Grep tool is not found !`);
+          return;
         }
-      })();
+        const userArg = arg.filter(
+          (x) => ![...a._, `--tool=${tool.name}`].includes(x),
+        );
+        clog({ userArg });
+
+        const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
+        const cwd = (await denops.call("getcwd")) as string;
+        const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
+        clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
+        try {
+          clog("close process");
+          p.close();
+        } catch (e) {
+          clog(e);
+        }
+        clog({ cmd, cwd });
+        p = Deno.run({
+          cmd,
+          cwd,
+          stdin: "null",
+          stdout: "piped",
+          stderr: "piped",
+        });
+
+        clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
+        await fn.setqflist(denops, [], "r");
+        await fn.setqflist(denops, [], "a", {
+          title: `[Search results for ${pattern} on ${tool.cmd}]`,
+        });
+        await denops.cmd("botright copen");
+
+        if (p.stdout === null) {
+          return;
+        }
+        for await (const line of io.readLines(p.stdout)) {
+          clog({ line });
+          await fn.setqflist(denops, [], "a", { lines: [line] });
+        }
+
+        const [status, stdoutArray, stderrArray] = await Promise.all([
+          p.status(),
+          p.output(),
+          p.stderrOutput(),
+        ]);
+        const stdout = new TextDecoder().decode(stdoutArray);
+        const stderr = new TextDecoder().decode(stderrArray);
+        p.close();
+
+        clog({ status, stdout, stderr });
+      } catch (e) {
+        console.log(e);
+      }
     },
   };
 
