@@ -88,7 +88,7 @@ export async function main(denops: Denops): Promise<void> {
         clog({ userArg });
 
         const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
-        const cwd = (await denops.call("getcwd")) as string;
+        const cwd = await fn.getcwd(denops) as string
         const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
         clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
         try {
