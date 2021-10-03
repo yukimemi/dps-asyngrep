@@ -1,15 +1,13 @@
-import {
-  _,
-  Denops,
-  execute,
-  flags,
-  fn,
-  fs,
-  io,
-  path,
-  toml,
-  vars,
-} from "./deps.ts";
+import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
+import * as flags from "https://deno.land/std@0.109.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v2.0.1/function/mod.ts";
+import * as fs from "https://deno.land/std@0.109.0/fs/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v2.0.1/helper/mod.ts";
+import * as io from "https://deno.land/std@0.109.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.109.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.109.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v2.0.1/variable/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v2.0.1/mod.ts";
 
 type Tool = {
   name: string;
@@ -20,6 +18,7 @@ type Tool = {
 export async function main(denops: Denops): Promise<void> {
   // debug.
   const debug = await vars.g.get(denops, "asyngrep_debug", false);
+  // deno-lint-ignore no-explicit-any
   const clog = (...data: any[]): void => {
     if (debug) {
       console.log(...data);
@@ -56,7 +55,7 @@ export async function main(denops: Denops): Promise<void> {
 
   clog({ cfg });
 
-  // Set default name.
+  // Set default tool name.
   const tools = cfg.tool as Tool[];
   const executable = tools.find(
     async (x) => (await fn.executable(denops, x.cmd)) as boolean,
@@ -79,7 +78,7 @@ export async function main(denops: Denops): Promise<void> {
         clog({ pattern });
         clog({ tool });
         if (!tool) {
-          console.warn(`Grep tool is not found !`);
+          console.warn(`Grep tool [${a.tool}] is not found !`);
           return;
         }
         const userArg = arg.filter(
@@ -88,7 +87,7 @@ export async function main(denops: Denops): Promise<void> {
         clog({ userArg });
 
         const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
-        const cwd = await fn.getcwd(denops) as string
+        const cwd = await fn.getcwd(denops) as string;
         const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
         clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
         try {
@@ -137,7 +136,7 @@ export async function main(denops: Denops): Promise<void> {
     },
   };
 
-  await execute(
+  await helper.execute(
     denops,
     `
     command! -nargs=* Agp call denops#notify('${denops.name}', 'asyngrep', [<f-args>])
