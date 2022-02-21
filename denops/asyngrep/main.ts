@@ -1,13 +1,14 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.109.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v2.0.1/function/mod.ts";
-import * as fs from "https://deno.land/std@0.109.0/fs/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v2.0.1/helper/mod.ts";
-import * as io from "https://deno.land/std@0.109.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.109.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.109.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v2.0.1/variable/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v2.0.1/mod.ts";
+import * as flags from "https://deno.land/std@0.126.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.1.0/function/mod.ts";
+import * as fs from "https://deno.land/std@0.126.0/fs/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v3.1.0/helper/mod.ts";
+import * as io from "https://deno.land/std@0.126.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.126.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.126.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v3.1.0/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v1.7.4/batch/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.1.0/mod.ts";
 
 type Tool = {
   name: string;
@@ -106,11 +107,13 @@ export async function main(denops: Denops): Promise<void> {
         });
 
         clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
-        await fn.setqflist(denops, [], "r");
-        await fn.setqflist(denops, [], "a", {
-          title: `[Search results for ${pattern} on ${tool.cmd}]`,
+        await batch(denops, async (denops) => {
+          await fn.setqflist(denops, [], "r");
+          await fn.setqflist(denops, [], "a", {
+            title: `[Search results for ${pattern} on ${tool.cmd}]`,
+          });
+          await denops.cmd("botright copen");
         });
-        await denops.cmd("botright copen");
 
         if (p.stdout === null) {
           return;
