@@ -1,14 +1,14 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.126.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.1.0/function/mod.ts";
-import * as fs from "https://deno.land/std@0.126.0/fs/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v3.1.0/helper/mod.ts";
-import * as io from "https://deno.land/std@0.126.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.126.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.126.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v3.1.0/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v1.7.4/batch/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.1.0/mod.ts";
+import * as flags from "https://deno.land/std@0.129.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.1.4/function/mod.ts";
+import * as fs from "https://deno.land/std@0.129.0/fs/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v3.1.4/helper/mod.ts";
+import * as io from "https://deno.land/std@0.129.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.129.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.129.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v3.1.4/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v3.1.4/batch/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.1.4/mod.ts";
 
 type Tool = {
   name: string;
@@ -142,7 +142,10 @@ export async function main(denops: Denops): Promise<void> {
   await helper.execute(
     denops,
     `
-    command! -nargs=* Agp call denops#notify('${denops.name}', 'asyngrep', [<f-args>])
+    function! s:notify(method, params) abort
+      call denops#plugin#wait_async('${denops.name}', function('denops#notify', ['${denops.name}', a:method, a:params]))
+    endfunction
+    command! -nargs=* Agp call s:notify('asyngrep', [<f-args>])
   `,
   );
 
