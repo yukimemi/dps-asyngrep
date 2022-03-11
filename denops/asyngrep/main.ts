@@ -142,10 +142,10 @@ export async function main(denops: Denops): Promise<void> {
   await helper.execute(
     denops,
     `
-    function! s:notify(method, params) abort
+    function! s:${denops.name}_notify(method, params) abort
       call denops#plugin#wait_async('${denops.name}', function('denops#notify', ['${denops.name}', a:method, a:params]))
     endfunction
-    command! -nargs=* Agp call s:notify('asyngrep', [<f-args>])
+    command! -nargs=* Agp call s:${denops.name}_notify('asyngrep', [<f-args>])
   `,
   );
 
