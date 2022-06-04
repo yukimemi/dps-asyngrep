@@ -1,20 +1,31 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.129.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.1.4/function/mod.ts";
-import * as fs from "https://deno.land/std@0.129.0/fs/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v3.1.4/helper/mod.ts";
-import * as io from "https://deno.land/std@0.129.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.129.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.129.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v3.1.4/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v3.1.4/batch/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.1.4/mod.ts";
+import * as flags from "https://deno.land/std@0.142.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v3.3.1/helper/mod.ts";
+import * as io from "https://deno.land/std@0.142.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.142.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.142.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v3.3.1/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v3.3.1/batch/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
 
 type Tool = {
   name: string;
   cmd: string;
   arg: string[];
 };
+
+export function existsSync(filePath: string): boolean {
+  try {
+    Deno.lstatSync(filePath);
+    return true;
+  } catch (err) {
+    if (err instanceof Deno.errors.NotFound) {
+      return false;
+    }
+    throw err;
+  }
+}
 
 export async function main(denops: Denops): Promise<void> {
   // debug.
@@ -42,7 +53,7 @@ export async function main(denops: Denops): Promise<void> {
     )) as string,
   )) as string;
   clog(`g:asyngrep_cfg_path = ${userToml}`);
-  if (await fs.exists(userToml)) {
+  if (existsSync(userToml)) {
     clog(`Merge user config: ${userToml}`);
     cfg = {
       tool: [
