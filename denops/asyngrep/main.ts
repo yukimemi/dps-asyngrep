@@ -1,13 +1,13 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.142.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.3.1/function/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v3.3.1/helper/mod.ts";
-import * as io from "https://deno.land/std@0.142.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.142.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.142.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v3.3.1/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v3.3.1/batch/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.3.1/mod.ts";
+import * as flags from "https://deno.land/std@0.145.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.3.2/function/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v3.3.2/helper/mod.ts";
+import * as io from "https://deno.land/std@0.145.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.145.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.145.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v3.3.2/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v3.3.2/batch/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.3.2/mod.ts";
 
 type Tool = {
   name: string;
@@ -69,8 +69,8 @@ export async function main(denops: Denops): Promise<void> {
 
   // Set default tool name.
   const tools = cfg.tool as Tool[];
-  const executable = tools.find(
-    async (x) => (await fn.executable(denops, x.cmd)) as boolean,
+  const executable = tools.find(async (x) =>
+    (await fn.executable(denops, x.cmd)) as boolean
   );
   const def = tools.find((x) => x.name === "default") ?? executable;
   clog({ def });
@@ -83,9 +83,18 @@ export async function main(denops: Denops): Promise<void> {
         clog({ args });
         const arg = args as string[];
         const a = flags.parse(arg);
-        const pattern = a._.length > 0
-          ? a._.join(" ")
-          : await fn.input(denops, "Search for pattern: ");
+        let pattern = a._.length > 0 ? a._.join(" ") : "";
+        if (pattern === "") {
+          const userInput = await helper.input(denops, {
+            prompt: "Search for pattern: ",
+          });
+          if (userInput == null) {
+            clog(`input is null ! so cancel !`);
+            await helper.echo(denops, `dps-asyngrep: cancel !`);
+            return;
+          }
+          pattern = userInput;
+        }
         const tool = a.tool ? tools.find((x) => x.name === a.tool) : def;
         clog({ pattern });
         clog({ tool });
@@ -93,13 +102,13 @@ export async function main(denops: Denops): Promise<void> {
           console.warn(`Grep tool [${a.tool}] is not found !`);
           return;
         }
-        const userArg = arg.filter(
-          (x) => ![...a._, `--tool=${tool.name}`].includes(x),
+        const userArg = arg.filter((x) =>
+          ![...a._, `--tool=${tool.name}`].includes(x)
         );
         clog({ userArg });
 
         const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
-        const cwd = await fn.getcwd(denops) as string;
+        const cwd = (await fn.getcwd(denops)) as string;
         const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
         clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
         try {
