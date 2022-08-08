@@ -7,6 +7,11 @@ import * as path from "https://deno.land/std@0.151.0/path/mod.ts";
 import * as toml from "https://deno.land/std@0.151.0/encoding/toml.ts";
 import * as vars from "https://deno.land/x/denops_std@v3.8.1/variable/mod.ts";
 import { batch } from "https://deno.land/x/denops_std@v3.8.1/batch/mod.ts";
+import {
+  ensureArray,
+  ensureNumber,
+  ensureString,
+} from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v3.8.1/mod.ts";
 
 type Tool = {
@@ -44,21 +49,27 @@ export async function main(denops: Denops): Promise<void> {
   clog({ cfg });
 
   // User config.
-  const userToml = (await fn.expand(
-    denops,
-    (await vars.g.get(
+  const userToml = ensureString(
+    await fn.expand(
       denops,
-      "asyngrep_cfg_path",
-      "~/.asyngrep.toml",
-    )) as string,
-  )) as string;
+      ensureString(
+        await vars.g.get(
+          denops,
+          "asyngrep_cfg_path",
+          "~/.asyngrep.toml",
+        ),
+      ),
+    ),
+  );
   clog(`g:asyngrep_cfg_path = ${userToml}`);
   if (existsSync(userToml)) {
     clog(`Merge user config: ${userToml}`);
     cfg = {
       tool: [
-        ...(cfg.tool as Tool[]),
-        ...(toml.parse(await Deno.readTextFile(userToml)).tool as Tool[]),
+        ...(ensureArray<Tool>(cfg.tool)),
+        ...(ensureArray<Tool>(
+          toml.parse(await Deno.readTextFile(userToml)).tool,
+        )),
       ],
     };
   }
@@ -68,9 +79,9 @@ export async function main(denops: Denops): Promise<void> {
   clog({ cfg });
 
   // Set default tool name.
-  const tools = cfg.tool as Tool[];
+  const tools = ensureArray<Tool>(cfg.tool);
   const executable = tools.find(async (x) =>
-    (await fn.executable(denops, x.cmd)) as boolean
+    ensureNumber(await fn.executable(denops, x.cmd))
   );
   const def = tools.find((x) => x.name === "default") ?? executable;
   clog({ def });
@@ -81,7 +92,7 @@ export async function main(denops: Denops): Promise<void> {
     async asyngrep(...args: unknown[]): Promise<void> {
       try {
         clog({ args });
-        const arg = args as string[];
+        const arg = ensureArray<string>(args);
         const a = flags.parse(arg);
         let pattern = a._.length > 0 ? a._.join(" ") : "";
         if (pattern === "") {
@@ -102,14 +113,15 @@ export async function main(denops: Denops): Promise<void> {
           console.warn(`Grep tool [${a.tool}] is not found !`);
           return;
         }
+        const cwd = a.path ?? ensureString(await fn.getcwd(denops));
+        clog({ cwd });
         const userArg = arg.filter((x) =>
-          ![...a._, `--tool=${tool.name}`].includes(x)
+          ![...a._, `--tool=${tool.name}`, `--path=${cwd}`].includes(x)
         );
         clog({ userArg });
 
         const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
-        const cwd = (await fn.getcwd(denops)) as string;
-        const cmd = [tool.cmd, ...toolArg, pattern, cwd] as string[];
+        const cmd = ensureArray<string>([tool.cmd, ...toolArg, pattern]);
         clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
         try {
           clog("close process");
@@ -117,10 +129,12 @@ export async function main(denops: Denops): Promise<void> {
         } catch (e) {
           clog(e);
         }
-        clog({ cmd, cwd });
+        const expandCwd = ensureString(await fn.expand(denops, cwd));
+        clog({ cmd, expandCwd });
+        await fn.chdir(denops, expandCwd);
         p = Deno.run({
           cmd,
-          cwd,
+          cwd: expandCwd,
           stdin: "null",
           stdout: "piped",
           stderr: "piped",
