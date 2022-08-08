@@ -1,13 +1,13 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.145.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.3.2/function/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v3.3.2/helper/mod.ts";
-import * as io from "https://deno.land/std@0.145.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.145.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.145.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v3.3.2/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v3.3.2/batch/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.3.2/mod.ts";
+import * as flags from "https://deno.land/std@0.151.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.8.1/function/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v3.8.1/helper/mod.ts";
+import * as io from "https://deno.land/std@0.151.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.151.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.151.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v3.8.1/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v3.8.1/batch/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.8.1/mod.ts";
 
 type Tool = {
   name: string;
