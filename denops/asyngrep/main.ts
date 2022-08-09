@@ -129,7 +129,9 @@ export async function main(denops: Denops): Promise<void> {
         } catch (e) {
           clog(e);
         }
-        const expandCwd = ensureString(await fn.expand(denops, cwd));
+        const expandCwd = ensureString(
+          path.resolve(ensureString(await fn.expand(denops, cwd))),
+        );
         clog({ cmd, expandCwd });
         await fn.chdir(denops, expandCwd);
         p = Deno.run({
@@ -144,7 +146,8 @@ export async function main(denops: Denops): Promise<void> {
         await batch(denops, async (denops) => {
           await fn.setqflist(denops, [], "r");
           await fn.setqflist(denops, [], "a", {
-            title: `[Search results for ${pattern} on ${tool.cmd}]`,
+            title:
+              `[Search results for ${pattern} on ${tool.cmd} path: ${expandCwd}]`,
           });
           await denops.cmd("botright copen");
         });
