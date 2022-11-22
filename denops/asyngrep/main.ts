@@ -1,18 +1,18 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.151.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.8.1/function/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v3.8.1/helper/mod.ts";
-import * as io from "https://deno.land/std@0.151.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.151.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.151.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v3.8.1/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v3.8.1/batch/mod.ts";
+import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v3.9.3/function/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v3.9.3/helper/mod.ts";
+import * as io from "https://deno.land/std@0.165.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.165.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.165.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v3.9.3/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v3.9.3/batch/mod.ts";
 import {
   ensureArray,
   ensureNumber,
   ensureString,
-} from "https://deno.land/x/unknownutil@v2.0.0/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.8.1/mod.ts";
+} from "https://deno.land/x/unknownutil@v2.1.0/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v3.9.3/mod.ts";
 
 type Tool = {
   name: string;
@@ -155,8 +155,13 @@ export async function main(denops: Denops): Promise<void> {
         if (p.stdout === null) {
           return;
         }
-        for await (const line of io.readLines(p.stdout)) {
+        for await (let line of io.readLines(p.stdout)) {
           clog({ line });
+          let lsp = line.split("|");
+          if (!path.isAbsolute(lsp[0])) {
+            const absolute = path.join(expandCwd, lsp[0]);
+            line = [absolute, ...lsp.slice(1, -1)].join("|");
+          }
           await fn.setqflist(denops, [], "a", { lines: [line] });
         }
 
