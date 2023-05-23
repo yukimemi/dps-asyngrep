@@ -1,18 +1,18 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.165.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v3.9.3/function/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v3.9.3/helper/mod.ts";
-import * as io from "https://deno.land/std@0.165.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.165.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.165.0/encoding/toml.ts";
-import * as vars from "https://deno.land/x/denops_std@v3.9.3/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v3.9.3/batch/mod.ts";
+import * as flags from "https://deno.land/std@0.188.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v5.0.0/function/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v5.0.0/helper/mod.ts";
+import * as io from "https://deno.land/std@0.188.0/io/mod.ts";
+import * as path from "https://deno.land/std@0.188.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.188.0/encoding/toml.ts";
+import * as vars from "https://deno.land/x/denops_std@v5.0.0/variable/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v5.0.0/batch/mod.ts";
 import {
   ensureArray,
   ensureNumber,
   ensureString,
-} from "https://deno.land/x/unknownutil@v2.1.0/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v3.9.3/mod.ts";
+} from "https://deno.land/x/unknownutil@v2.1.1/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v5.0.0/mod.ts";
 
 type Tool = {
   name: string;
