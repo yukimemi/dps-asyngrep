@@ -4,7 +4,7 @@ import * as fn from "https://deno.land/x/denops_std@v5.0.0/function/mod.ts";
 import * as helper from "https://deno.land/x/denops_std@v5.0.0/helper/mod.ts";
 import * as io from "https://deno.land/std@0.188.0/io/mod.ts";
 import * as path from "https://deno.land/std@0.188.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.188.0/encoding/toml.ts";
+import * as toml from "https://deno.land/std@0.188.0/toml/mod.ts";
 import * as vars from "https://deno.land/x/denops_std@v5.0.0/variable/mod.ts";
 import { batch } from "https://deno.land/x/denops_std@v5.0.0/batch/mod.ts";
 import {
@@ -157,7 +157,7 @@ export async function main(denops: Denops): Promise<void> {
         }
         for await (let line of io.readLines(p.stdout)) {
           clog({ line });
-          let lsp = line.split("|");
+          const lsp = line.split("|");
           if (!path.isAbsolute(lsp[0])) {
             const absolute = path.join(expandCwd, lsp[0]);
             line = [absolute, ...lsp.slice(1, -1)].join("|");
