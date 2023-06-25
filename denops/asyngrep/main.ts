@@ -1,18 +1,16 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.188.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v5.0.0/function/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v5.0.0/helper/mod.ts";
-import * as io from "https://deno.land/std@0.188.0/io/mod.ts";
-import * as path from "https://deno.land/std@0.188.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.188.0/toml/mod.ts";
-import * as vars from "https://deno.land/x/denops_std@v5.0.0/variable/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v5.0.0/batch/mod.ts";
-import {
-  ensureArray,
-  ensureNumber,
-  ensureString,
-} from "https://deno.land/x/unknownutil@v2.1.1/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v5.0.0/mod.ts";
+import * as flags from "https://deno.land/std@0.192.0/flags/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v5.0.1/function/mod.ts";
+import * as fs from "https://deno.land/std@0.192.0/fs/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v5.0.1/helper/mod.ts";
+import * as path from "https://deno.land/std@0.192.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.192.0/toml/mod.ts";
+import * as vars from "https://deno.land/x/denops_std@v5.0.1/variable/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v5.0.1/mod.ts";
+import { TextLineStream } from "https://deno.land/std@0.192.0/streams/mod.ts";
+import { abortable } from "https://deno.land/std@0.192.0/async/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v5.0.1/batch/mod.ts";
+import { ensure, is } from "https://deno.land/x/unknownutil@v3.2.0/mod.ts";
 
 type Tool = {
   name: string;
@@ -20,15 +18,15 @@ type Tool = {
   arg: string[];
 };
 
-export function existsSync(filePath: string): boolean {
-  try {
-    Deno.lstatSync(filePath);
-    return true;
-  } catch (err) {
-    if (err instanceof Deno.errors.NotFound) {
-      return false;
+async function* iterLine(r: ReadableStream<Uint8Array>): AsyncIterable<string> {
+  const lines = r
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(new TextLineStream());
+
+  for await (const line of lines) {
+    if (ensure(line, is.String).length) {
+      yield ensure(line, is.String);
     }
-    throw err;
   }
 }
 
@@ -49,27 +47,29 @@ export async function main(denops: Denops): Promise<void> {
   clog({ cfg });
 
   // User config.
-  const userToml = ensureString(
+  const userToml = ensure(
     await fn.expand(
       denops,
-      ensureString(
-        await vars.g.get(
-          denops,
-          "asyngrep_cfg_path",
-          "~/.asyngrep.toml",
-        ),
+      ensure(
+        await vars.g.get(denops, "asyngrep_cfg_path", "~/.asyngrep.toml"),
+        is.String,
       ),
     ),
+    is.String,
   );
   clog(`g:asyngrep_cfg_path = ${userToml}`);
-  if (existsSync(userToml)) {
+  if (await fs.exists(userToml)) {
     clog(`Merge user config: ${userToml}`);
     cfg = {
       tool: [
-        ...(ensureArray<Tool>(cfg.tool)),
-        ...(ensureArray<Tool>(
+        ...ensure(
+          cfg.tool,
+          is.ArrayOf((x): x is Tool => is.Record(x)),
+        ),
+        ...ensure(
           toml.parse(await Deno.readTextFile(userToml)).tool,
-        )),
+          is.ArrayOf((x): x is Tool => is.Record(x)),
+        ),
       ],
     };
   }
@@ -79,28 +79,32 @@ export async function main(denops: Denops): Promise<void> {
   clog({ cfg });
 
   // Set default tool name.
-  const tools = ensureArray<Tool>(cfg.tool);
+  const tools = ensure(
+    cfg.tool,
+    is.ArrayOf((x): x is Tool => is.Record(x)),
+  );
   const executable = tools.find(async (x) =>
-    ensureNumber(await fn.executable(denops, x.cmd))
+    ensure(await fn.executable(denops, x.cmd), is.Number)
   );
   const def = tools.find((x) => x.name === "default") ?? executable;
   clog({ def });
 
-  let p: Deno.Process;
+  let p: Deno.ChildProcess;
+  let abortController = new AbortController();
 
   denops.dispatcher = {
     async asyngrep(...args: unknown[]): Promise<void> {
       try {
         clog({ args });
-        const arg = ensureArray<string>(args);
+        const arg = ensure(args, is.ArrayOf(is.String));
         const a = flags.parse(arg);
         let pattern = a._.length > 0 ? a._.join(" ") : "";
         if (pattern === "") {
           const userInput = await helper.input(denops, {
             prompt: "Search for pattern: ",
           });
-          if (userInput == null) {
-            clog(`input is null ! so cancel !`);
+          if (userInput == null || userInput === "") {
+            clog(`input is nothing ! so cancel !`);
             await helper.echo(denops, `dps-asyngrep: cancel !`);
             return;
           }
@@ -113,36 +117,41 @@ export async function main(denops: Denops): Promise<void> {
           console.warn(`Grep tool [${a.tool}] is not found !`);
           return;
         }
-        const cwd = a.path ?? ensureString(await fn.getcwd(denops));
+        const cwd = a.path ?? ensure(await fn.getcwd(denops), is.String);
         clog({ cwd });
-        const userArg = arg.filter((x) =>
-          ![...a._, `--tool=${tool.name}`, `--path=${cwd}`].includes(x)
+        const userArg = arg.filter(
+          (x) => ![...a._, `--tool=${tool.name}`, `--path=${cwd}`].includes(x),
         );
         clog({ userArg });
 
         const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
-        const cmd = ensureArray<string>([tool.cmd, ...toolArg, pattern]);
-        clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
+        const cmdArgs = ensure([...toolArg, pattern], is.ArrayOf(is.String));
+        clog(`pid: ${p?.pid}`);
         try {
-          clog("close process");
-          p.close();
+          clog("kill process");
+          abortController.abort();
+          p.kill("SIGTERM");
         } catch (e) {
           clog(e);
         }
-        const expandCwd = ensureString(
-          path.resolve(ensureString(await fn.expand(denops, cwd))),
+        abortController = new AbortController();
+        const expandCwd = ensure(
+          path.resolve(ensure(await fn.expand(denops, cwd), is.String)),
+          is.String,
         );
-        clog({ cmd, expandCwd });
+        clog({ cmdArgs, expandCwd });
         await fn.chdir(denops, expandCwd);
-        p = Deno.run({
-          cmd,
-          cwd: expandCwd,
+
+        clog(`--- asyngrep start ---`);
+
+        p = new Deno.Command(tool.cmd, {
+          args: cmdArgs,
           stdin: "null",
           stdout: "piped",
           stderr: "piped",
-        });
+        }).spawn();
 
-        clog(`pid: ${p?.pid}, rid: ${p?.rid}`);
+        clog(`pid: ${p?.pid}`);
         await batch(denops, async (denops) => {
           await fn.setqflist(denops, [], "r");
           await fn.setqflist(denops, [], "a", {
@@ -152,11 +161,17 @@ export async function main(denops: Denops): Promise<void> {
           await denops.cmd("botright copen");
         });
 
-        if (p.stdout === null) {
+        if (!p || p.stdout === null) {
           return;
         }
-        for await (let line of io.readLines(p.stdout)) {
+        for await (
+          let line of abortable(
+            iterLine(p.stdout),
+            abortController.signal,
+          )
+        ) {
           clog({ line });
+          line = line.trim();
           const lsp = line.split("|");
           if (!path.isAbsolute(lsp[0])) {
             const absolute = path.join(expandCwd, lsp[0]);
@@ -165,16 +180,19 @@ export async function main(denops: Denops): Promise<void> {
           await fn.setqflist(denops, [], "a", { lines: [line] });
         }
 
-        const [status, stdoutArray, stderrArray] = await Promise.all([
-          p.status(),
-          p.output(),
-          p.stderrOutput(),
-        ]);
-        const stdout = new TextDecoder().decode(stdoutArray);
-        const stderr = new TextDecoder().decode(stderrArray);
-        p.close();
+        clog(`--- asyngrep end ---`);
 
-        clog({ status, stdout, stderr });
+        const status = await p.status;
+        if (!status.success) {
+          for await (
+            const line of abortable(
+              iterLine(p.stderr),
+              abortController.signal,
+            )
+          ) {
+            clog({ line });
+          }
+        }
       } catch (e) {
         console.log(e);
       }

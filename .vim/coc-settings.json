@@ -9,5 +9,6 @@
     "typescriptreact"
   ],
   "tsserver.enable": false,
-  "coc.source.file.trimSameExts": []
+  "coc.source.file.trimSameExts": [],
+  "tsdetect.mode": "manual"
 }
