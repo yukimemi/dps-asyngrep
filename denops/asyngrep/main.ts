@@ -194,7 +194,7 @@ export async function main(denops: Denops): Promise<void> {
           }
         }
       } catch (e) {
-        console.log(e);
+        clog(e);
       }
     },
   };
