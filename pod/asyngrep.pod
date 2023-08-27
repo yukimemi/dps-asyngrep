@@ -1,17 +1,22 @@
 ---
 name: asyngrep
-description: A random colorscheme plugin.
+description: async grep.
 ---
 
 =pod
 
 =head1 dps-asyngrep
 
-Denops random colorscheme.
+Denops Async Grep plugin.
 
 =head1 Features X<asyngrep-features>
 
-This plugin change the colorscheme for Vim / Neovim.
+This plugin is a wrapper for some grep tools.
+
+L<非同期に Grep 検索する (denops.vim)|https://zenn.dev/yukimemi/articles/2021-03-21-dps-asyngrep>
+
+[![asciicast](https://asciinema.org/a/JFQPdITg4is48RwQLpcTLTIJv.svg)](https://asciinema.org/a/JFQPdITg4is48RwQLpcTLTIJv)
+
 
 =head1 Installation X<asyngrep-installation>
 
@@ -43,43 +48,17 @@ dvpm.add({ url: "yukimemi/dps-asyngrep" });
 
 =item [vim-denops/denops.vim: 🐜 An ecosystem of Vim/Neovim which allows developers to write cross-platform plugins in Deno](https://github.com/vim-denops/denops.vim)
 
+=item Some grep tools. rg, pt, jvgrep, etc.
+
 =head1 Usage X<asyngrep-usage>
 
 No special settings are required.
-By default it changes the colorscheme every 3,600 seconds.
+Default is L<config.toml|https://github.com/yukimemi/dps-asyngrep/blob/main/denops/asyngrep/config.toml>
 
 =head1 Commands X<asyngrep-commands>
 
-C<:ChangeColorscheme>                                      X<:ChangeColorscheme>
-Change the colorscheme.
-
-C<:OpenColorschemeSetting>                            X<:OpenColorschemeSetting>
-Open the asyngrep priority setting.
-colorschme setting is a toml file.
-Colorschemes with higher numerical priorities are preferred.
-
-C<:ResetColorschemeSetting>                          X<:ResetColorschemeSetting>
-Remove the asyngrep setting file.
-The configuration file will be automatically regenerated the next time you start Vim / Neovim.
-
-C<:Disableasyngrep>                        X<:Disableasyngrep>
-Disable asyngrep.
-Stop changing colorschme.
-
-C<:Enableasyngrep>                          X<:Enableasyngrep>
-Enable asyngrep.
-
-C<:DisableThisColorscheme>                            X<:DisableThisColorscheme>
-Disable this colorscheme.
-(Set colorschmeme priority to 0.)
-
-C<:LikeThisColorscheme [size]>                           X<:LikeThisColorscheme>
-Increase priority by `g:asyngrep_changesize`. (default)
-If size is passed, increase priority according to size.
-
-C<:HateThisColorscheme [size]>                           X<:HateThisColorscheme>
-Decrease priority by `g:asyngrep_changesize`. (default)
-If size is passed, decrease priority according to size.
+C<:Agp>                                                                X<:Agp>
+Asyncronous grep.
 
 =head1 Config X<asyngrep-config>
 
@@ -89,103 +68,16 @@ C<g:asyngrep_debug>                        X<g:asyngrep_debug>
 Enable debug messages.
 default is v:false
 
-C<g:asyngrep_echo>                          X<g:asyngrep_echo>
-Whether to echo the modified colorscheme.
-default is v:true
-
-C<g:asyngrep_notify>                      X<g:asyngrep_notify>
-Whether to `vim.notify` the modified colorscheme. (Neovim only)
-default is v:false
-
-C<g:asyngrep_interval>                  X<g:asyngrep_interval>
-Interval to change colorscheme.
-default is 3600 (seconds)
-
-C<g:asyngrep_retry>                        X<g:asyngrep_retry>
-Whether to retry change colorscheme when after changed colorschme is same before.
-default is v:true
-
-C<g:asyngrep_checkwait>                X<g:asyngrep_checkwait>
-Time to wait before checking `g:colors_name` after changing colorschme.
-`g:colors_name` may not be included immediately after changing colorschme.
-default is 3000 (milliseconds)
-
-C<g:asyngrep_enables>                    X<g:asyngrep_enables>
-A list of colorschemes to be used for selection.
-If this list is set, only the changing colorschme that includes this list will be used.
-Not included colorscheme's priority are all set to 0.
-default is [] (Use all colorscheme)
-
-C<g:asyngrep_disables>                  X<g:asyngrep_disables>
-A list of colorschemes to be not used for selection.
-If this list is set, only the changing colorschme that not includes this list will be used.
-Included colorscheme's priority are all set to 0.
-default is [] (Use all colorscheme)
-
-C<g:asyngrep_match>                        X<g:asyngrep_match>
-A match pattern to be used for selection. (regexp)
-If this pattern is set, only the changing colorschme that match this pattern will be used.
-default is "" (Use all colorscheme)
-
-C<g:asyngrep_notmatch>                  X<g:asyngrep_notmatch>
-A match pattern to be not used for selection. (regexp)
-If this pattern is set, only the changing colorschme that not match this pattern will be used.
-default is "" (Use all colorscheme)
-
-C<g:asyngrep_events>                      X<g:asyngrep_events>
-A list of events to be used for selection.
-If this list is set, the colorscheme will be changed if the target event fires.
-default is []
-
-C<g:asyngrep_background>              X<g:asyngrep_background>
-"dark" or "light"
-If this option is set, the background option set after the colorscheme change is set
-default is ""
-
-C<g:asyngrep_changesize>              X<g:asyngrep_changesize>
-Priority size changed during LikeThisColorscheme and HatesThisColorscheme.
-default is 50
-
-C<g:asyngrep_path>                          X<g:asyngrep_path>
-The path to the colorscheme config file.
-default is $XDG_CONFIG_HOME/asyngrep/colorschemes.toml
-
-C<g:asyngrep_colors_path>            X<g:asyngrep_colors_path>
-colorschme looks from runtimepath and, for Neovim, from stdpath("data").
-If it is delayed by plugin manager etc.,
-it may not be included in the runtimepath at the time of startup.
-If you still want to use asyngrep, add it manually to
-`g:asyngrep_colors_path` as a search path.
-This path will be searched recursively, and `colors/*.vim` or `colors/*.lua` files
-will be registered as colorscheme.
-default is []
-
-C<g:asyngrep_priority>                  X<g:asyngrep_priority>
-The priority of the colorscheme. (readonly)
-You can use this value for statusline.
+C<g:asyngrep_cfg_path>                                          X<g:asyngrep_cfg_path>
+Path to config toml file path.
+default is `~/.asyngrep.toml`
 
 =head1 Example X<asyngrep-example>
 
 =begin vim
 
 let g:asyngrep_debug = v:false
-let g:asyngrep_echo = v:false
-let g:asyngrep_notify = v:true
-let g:asyngrep_interval = 60
-let g:asyngrep_enables = ["morning", "ron"]
-let g:asyngrep_disables = ["evening", "default"]
-let g:asyngrep_match = "base16"
-let g:asyngrep_notmatch = "light"
-let g:asyngrep_events = ["CursorHold", "FocusLost", "BufWritePost"]
-let g:asyngrep_background = "dark"
-let g:asyngrep_path = expand("~/.cache/colors.toml")
-let g:asyngrep_colors_path = [expand("~/.cache/vim/plugs")]
-
-" Useful mappings
-nnoremap <space>rc <cmd>ChangeColorscheme<cr>
-nnoremap <space>rd <cmd>DisableThisColorscheme<cr>
-nnoremap <space>rl <cmd>LikeThisColorscheme<cr>
-nnoremap <space>rh <cmd>HateThisColorscheme<cr>
+let g:asyngrep_cfg_path = expand("~/.config/asyngrep/config.toml")
 
 =end vim
 

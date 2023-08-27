@@ -83,9 +83,7 @@ export async function main(denops: Denops): Promise<void> {
     cfg.tool,
     is.ArrayOf((x): x is Tool => is.Record(x)),
   );
-  const executable = tools.find(async (x) =>
-    ensure(await fn.executable(denops, x.cmd), is.Number)
-  );
+  const executable = tools.find(async (x) => ensure(await fn.executable(denops, x.cmd), is.Number));
   const def = tools.find((x) => x.name === "default") ?? executable;
   clog({ def });
 
@@ -155,8 +153,7 @@ export async function main(denops: Denops): Promise<void> {
         await batch(denops, async (denops) => {
           await fn.setqflist(denops, [], "r");
           await fn.setqflist(denops, [], "a", {
-            title:
-              `[Search results for ${pattern} on ${tool.cmd} path: ${expandCwd}]`,
+            title: `[Search results for ${pattern} on ${tool.cmd} path: ${expandCwd}]`,
           });
           await denops.cmd("botright copen");
         });
