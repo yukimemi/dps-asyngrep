@@ -1,14 +1,18 @@
-*asyngrep.txt*                                   A random colorscheme plugin.
+*asyngrep.txt*                                                    async grep.
 =============================================================================
 dps-asyngrep~
 
-Denops random colorscheme.
+Denops Async Grep plugin.
 
 =============================================================================
 Features ~
                                                           *asyngrep-features*
 
-This plugin change the colorscheme for Vim / Neovim.
+This plugin is a wrapper for some grep tools.
+
+非同期に Grep 検索する (denops.vim) |https://zenn.dev/yukimemi/articles/2021-03-21-dps-asyngrep|
+
+[![asciicast](https://asciinema.org/a/JFQPdITg4is48RwQLpcTLTIJv.svg)](https://asciinema.org/a/JFQPdITg4is48RwQLpcTLTIJv)
 
 =============================================================================
 Installation ~
@@ -38,47 +42,20 @@ Requirements ~
 
 - [Deno - A modern runtime for JavaScript and TypeScript](https://deno.land/)
 - [vim-denops/denops.vim: 🐜 An ecosystem of Vim/Neovim which allows developers to write cross-platform plugins in Deno](https://github.com/vim-denops/denops.vim)
+- Some grep tools. rg, pt, jvgrep, etc.
 =============================================================================
 Usage ~
                                                              *asyngrep-usage*
 
 No special settings are required.
-By default it changes the colorscheme every 3,600 seconds.
+Default is config.toml |https://github.com/yukimemi/dps-asyngrep/blob/main/denops/asyngrep/config.toml|
 
 =============================================================================
 Commands ~
                                                           *asyngrep-commands*
 
-`:ChangeColorscheme`                                      *:ChangeColorscheme*
-Change the colorscheme.
-
-`:OpenColorschemeSetting`                            *:OpenColorschemeSetting*
-Open the asyngrep priority setting.
-colorschme setting is a toml file.
-Colorschemes with higher numerical priorities are preferred.
-
-`:ResetColorschemeSetting`                          *:ResetColorschemeSetting*
-Remove the asyngrep setting file.
-The configuration file will be automatically regenerated the next time you start Vim / Neovim.
-
-`:Disableasyngrep`                        *:Disableasyngrep*
-Disable asyngrep.
-Stop changing colorschme.
-
-`:Enableasyngrep`                          *:Enableasyngrep*
-Enable asyngrep.
-
-`:DisableThisColorscheme`                            *:DisableThisColorscheme*
-Disable this colorscheme.
-(Set colorschmeme priority to 0.)
-
-`:LikeThisColorscheme [size]`                           *:LikeThisColorscheme*
-Increase priority by `g:asyngrep_changesize`. (default)
-If size is passed, increase priority according to size.
-
-`:HateThisColorscheme [size]`                           *:HateThisColorscheme*
-Decrease priority by `g:asyngrep_changesize`. (default)
-If size is passed, decrease priority according to size.
+`:Agp`                                                                *:Agp*
+Asyncronous grep.
 
 =============================================================================
 Config ~
@@ -90,105 +67,34 @@ No settings are required. However, the following settings can be made if necessa
 Enable debug messages.
 default is v:false
 
-`g:asyngrep_echo`                          *g:asyngrep_echo*
-Whether to echo the modified colorscheme.
-default is v:true
-
-`g:asyngrep_notify`                      *g:asyngrep_notify*
-Whether to `vim.notify` the modified colorscheme. (Neovim only)
-default is v:false
-
-`g:asyngrep_interval`                  *g:asyngrep_interval*
-Interval to change colorscheme.
-default is 3600 (seconds)
-
-`g:asyngrep_retry`                        *g:asyngrep_retry*
-Whether to retry change colorscheme when after changed colorschme is same before.
-default is v:true
-
-`g:asyngrep_checkwait`                *g:asyngrep_checkwait*
-Time to wait before checking `g:colors_name` after changing colorschme.
-`g:colors_name` may not be included immediately after changing colorschme.
-default is 3000 (milliseconds)
-
-`g:asyngrep_enables`                    *g:asyngrep_enables*
-A list of colorschemes to be used for selection.
-If this list is set, only the changing colorschme that includes this list will be used.
-Not included colorscheme's priority are all set to 0.
-default is [] (Use all colorscheme)
-
-`g:asyngrep_disables`                  *g:asyngrep_disables*
-A list of colorschemes to be not used for selection.
-If this list is set, only the changing colorschme that not includes this list will be used.
-Included colorscheme's priority are all set to 0.
-default is [] (Use all colorscheme)
-
-`g:asyngrep_match`                        *g:asyngrep_match*
-A match pattern to be used for selection. (regexp)
-If this pattern is set, only the changing colorschme that match this pattern will be used.
-default is "" (Use all colorscheme)
-
-`g:asyngrep_notmatch`                  *g:asyngrep_notmatch*
-A match pattern to be not used for selection. (regexp)
-If this pattern is set, only the changing colorschme that not match this pattern will be used.
-default is "" (Use all colorscheme)
-
-`g:asyngrep_events`                      *g:asyngrep_events*
-A list of events to be used for selection.
-If this list is set, the colorscheme will be changed if the target event fires.
-default is []
-
-`g:asyngrep_background`              *g:asyngrep_background*
-"dark" or "light"
-If this option is set, the background option set after the colorscheme change is set
-default is ""
-
-`g:asyngrep_changesize`              *g:asyngrep_changesize*
-Priority size changed during LikeThisColorscheme and HatesThisColorscheme.
-default is 50
-
-`g:asyngrep_path`                          *g:asyngrep_path*
-The path to the colorscheme config file.
-default is $XDG_CONFIG_HOME/asyngrep/colorschemes.toml
-
-`g:asyngrep_colors_path`            *g:asyngrep_colors_path*
-colorschme looks from runtimepath and, for Neovim, from stdpath("data").
-If it is delayed by plugin manager etc.,
-it may not be included in the runtimepath at the time of startup.
-If you still want to use asyngrep, add it manually to
-`g:asyngrep_colors_path` as a search path.
-This path will be searched recursively, and `colors/*.vim` or `colors/*.lua` files
-will be registered as colorscheme.
-default is []
-
-`g:asyngrep_priority`                  *g:asyngrep_priority*
-The priority of the colorscheme. (readonly)
-You can use this value for statusline.
+`g:asyngrep_cfg_path`                                          *g:asyngrep_cfg_path*
+Path to config toml file path.
+default is `~/.asyngrep.toml`
 
 =============================================================================
 Example ~
                                                            *asyngrep-example*
 
+Example vim settings.~
+
 >
+	" Debug log option.
 	let g:asyngrep_debug = v:false
-	let g:asyngrep_echo = v:false
-	let g:asyngrep_notify = v:true
-	let g:asyngrep_interval = 60
-	let g:asyngrep_enables = ["morning", "ron"]
-	let g:asyngrep_disables = ["evening", "default"]
-	let g:asyngrep_match = "base16"
-	let g:asyngrep_notmatch = "light"
-	let g:asyngrep_events = ["CursorHold", "FocusLost", "BufWritePost"]
-	let g:asyngrep_background = "dark"
-	let g:asyngrep_path = expand("~/.cache/colors.toml")
-	let g:asyngrep_colors_path = [expand("~/.cache/vim/plugs")]
+	" User config (not necessary)
+	let g:asyngrep_cfg_path = "~/.config/asyngrep/config.toml"
 	
-	" Useful mappings
-	nnoremap <space>rc <cmd>ChangeColorscheme<cr>
-	nnoremap <space>rd <cmd>DisableThisColorscheme<cr>
-	nnoremap <space>rl <cmd>LikeThisColorscheme<cr>
-	nnoremap <space>rh <cmd>HateThisColorscheme<cr>
+	" Grep with default tool.
+	nnoremap <space>ss <cmd>Agp<cr>
+	
+	" Grep with ripgrep.
+	nnoremap <space>sr <cmd>Agp --tool=ripgrep<cr>
+	" Grep with pt.
+	nnoremap <space>sp <cmd>Agp --tool=pt<cr>
+	" Grep with jvgrep.
+	nnoremap <space>sj <cmd>Agp --tool=jvgrep<cr>
 <
+
+Example toml config.~
 
 =============================================================================
 License ~

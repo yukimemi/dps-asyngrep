@@ -1,16 +1,71 @@
 # dps-asyngrep
 
+Denops Async Grep plugin.
+
+# Features 
+
+This plugin is a wrapper for some grep tools.
+
 [非同期に Grep 検索する (denops.vim)](https://zenn.dev/yukimemi/articles/2021-03-21-dps-asyngrep)
 
 [![asciicast](https://asciinema.org/a/JFQPdITg4is48RwQLpcTLTIJv.svg)](https://asciinema.org/a/JFQPdITg4is48RwQLpcTLTIJv)
 
-## Example config.
+# Installation 
+
+If you use [folke/lazy.nvim](https://github.com/folke/lazy.nvim).
+
+```lua
+{
+  "yukimemi/dps-asyngrep",
+  lazy = false,
+  dependencies = {
+    "vim-denops/denops.vim",
+  },
+}
+```
+
+If you use [yukimemi/dvpm](https://github.com/yukimemi/dvpm).
+
+```typescript
+dvpm.add({ url: "yukimemi/dps-asyngrep" });
+```
+
+# Requirements 
+
+- [Deno - A modern runtime for JavaScript and TypeScript](https://deno.land/)
+- [vim-denops/denops.vim: 🐜 An ecosystem of Vim/Neovim which allows developers to write cross-platform plugins in Deno](https://github.com/vim-denops/denops.vim)
+- Some grep tools. rg, pt, jvgrep, etc.
+# Usage 
+
+No special settings are required.
+Default is [config.toml](https://github.com/yukimemi/dps-asyngrep/blob/main/denops/asyngrep/config.toml)
+
+# Commands 
+
+`:Agp`                                                                
+Asyncronous grep.
+
+# Config 
+
+No settings are required. However, the following settings can be made if necessary.
+
+`g:asyngrep_debug`                        
+Enable debug messages.
+default is v:false
+
+`g:asyngrep_cfg_path`                                          
+Path to config toml file path.
+default is `~/.asyngrep.toml`
+
+# Example 
+
+## Example vim settings.
 
 ```vim
 " Debug log option.
 let g:asyngrep_debug = v:false
 " User config (not necessary)
-let g:asyngrep_cfg_path = "~/.vim/asyngrep.toml"
+let g:asyngrep_cfg_path = "~/.config/asyngrep/config.toml"
 
 " Grep with default tool.
 nnoremap <space>ss <cmd>Agp<cr>
@@ -25,49 +80,9 @@ nnoremap <space>sj <cmd>Agp --tool=jvgrep<cr>
 
 ## Example toml config.
 
-- `g:asyngrep_cfg_path` toml file.
+# License 
 
-```toml
-[[tool]]
-name = "ripgrep-all"
-cmd = "rg"
-arg = ["-i", "--vimgrep", "--no-heading", "--hidden", "--no-ignore", "--regexp"]
-# Agp --tool=ripgrep-all
+Licensed under MIT License.
 
-[[tool]]
-name = "jvgrep-all"
-cmd = "jvgrep"
-arg = ["-i", "--no-color", "-I", "-R", "-8"]
-# Agp --tool=jvgrep-all
+Copyright (c) 2023 yukimemi
 
-[[tool]]
-name = "pt-all"
-cmd = "pt"
-arg = ["-i", "--nogroup", "--nocolor", "--smart-case", "--skip-vcs-ignores", "--hidden"]
-# Agp --tool=pt-all
-
-[[tool]]
-name = "default"
-cmd = "pt"
-arg = ["-i", "--nogroup", "--nocolor"]
-# Agp
-```
-
-## Default config.
-
-```toml
-[[tool]]
-name = "ripgrep"
-cmd = "rg"
-arg = ["-i", "--vimgrep", "--no-heading"]
-
-[[tool]]
-name = "jvgrep"
-cmd = "jvgrep"
-arg = ["-i", "--no-color", "-I", "-R", "-8"]
-
-[[tool]]
-name = "pt"
-cmd = "pt"
-arg = ["-i", "--nogroup", "--nocolor"]
-```
