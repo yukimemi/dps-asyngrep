@@ -80,6 +80,32 @@ nnoremap <space>sj <cmd>Agp --tool=jvgrep<cr>
 
 ## Example toml config.
 
+```ini
+[[tool]]
+name = "ripgrep-all"
+cmd = "rg"
+arg = ["-i", "--vimgrep", "--no-heading", "--hidden", "--no-ignore", "--regexp"]
+# Agp --tool=ripgrep-all
+
+[[tool]]
+name = "jvgrep-all"
+cmd = "jvgrep"
+arg = ["-i", "--no-color", "-I", "-R", "-8"]
+# Agp --tool=jvgrep-all
+
+[[tool]]
+name = "pt-all"
+cmd = "pt"
+arg = ["-i", "--nogroup", "--nocolor", "--smart-case", "--skip-vcs-ignores", "--hidden"]
+# Agp --tool=pt-all
+
+[[tool]]
+name = "default"
+cmd = "pt"
+arg = ["-i", "--nogroup", "--nocolor"]
+# Agp
+```
+
 # License 
 
 Licensed under MIT License.

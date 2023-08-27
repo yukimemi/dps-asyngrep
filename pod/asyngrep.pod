@@ -97,7 +97,7 @@ nnoremap <space>sj <cmd>Agp --tool=jvgrep<cr>
 
 =head2 Example toml config.
 
-=begin toml
+=begin ini
 
 [[tool]]
 name = "ripgrep-all"
@@ -123,7 +123,7 @@ cmd = "pt"
 arg = ["-i", "--nogroup", "--nocolor"]
 # Agp
 
-=end toml
+=end ini
 
 =head1 License X<asyngrep-license>
 
