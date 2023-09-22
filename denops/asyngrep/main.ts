@@ -99,7 +99,7 @@ export async function main(denops: Denops): Promise<void> {
         const dir = a.path ?? await helper.input(denops, {
           prompt: "Search directory: ",
           text: ensure(await fn.getcwd(denops), is.String),
-          completion: "command",
+          completion: "dir",
         });
         clog({ dir });
         let pattern = a._.length > 0 ? a._.join(" ") : "";
