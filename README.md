@@ -76,6 +76,8 @@ nnoremap <space>sr <cmd>Agp --tool=ripgrep<cr>
 nnoremap <space>sp <cmd>Agp --tool=pt<cr>
 " Grep with jvgrep.
 nnoremap <space>sj <cmd>Agp --tool=jvgrep<cr>
+" Grep with ugrep.
+nnoremap <space>su <cmd>Agp --tool=ugrep<cr>
 ```
 
 ## Example toml config.

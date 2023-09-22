@@ -96,6 +96,12 @@ export async function main(denops: Denops): Promise<void> {
         clog({ args });
         const arg = ensure(args, is.ArrayOf(is.String));
         const a = flags.parse(arg);
+        const dir = a.path ?? await helper.input(denops, {
+          prompt: "Search directory: ",
+          text: ensure(await fn.getcwd(denops), is.String),
+          completion: "command",
+        });
+        clog({ dir });
         let pattern = a._.length > 0 ? a._.join(" ") : "";
         if (pattern === "") {
           const userInput = await helper.input(denops, {
@@ -115,10 +121,8 @@ export async function main(denops: Denops): Promise<void> {
           console.warn(`Grep tool [${a.tool}] is not found !`);
           return;
         }
-        const cwd = a.path ?? ensure(await fn.getcwd(denops), is.String);
-        clog({ cwd });
         const userArg = arg.filter(
-          (x) => ![...a._, `--tool=${tool.name}`, `--path=${cwd}`].includes(x),
+          (x) => ![...a._, `--tool=${tool.name}`, `--path=${dir}`].includes(x),
         );
         clog({ userArg });
 
@@ -133,12 +137,11 @@ export async function main(denops: Denops): Promise<void> {
           clog(e);
         }
         abortController = new AbortController();
-        const expandCwd = ensure(
-          path.resolve(ensure(await fn.expand(denops, cwd), is.String)),
+        const expandDir = ensure(
+          path.resolve(ensure(await fn.expand(denops, dir), is.String)),
           is.String,
         );
-        clog({ cmdArgs, expandCwd });
-        await fn.chdir(denops, expandCwd);
+        clog({ cmdArgs, expandDir });
 
         clog(`--- asyngrep start ---`);
 
@@ -147,13 +150,14 @@ export async function main(denops: Denops): Promise<void> {
           stdin: "null",
           stdout: "piped",
           stderr: "piped",
+          cwd: expandDir,
         }).spawn();
 
         clog(`pid: ${p?.pid}`);
         await batch(denops, async (denops) => {
           await fn.setqflist(denops, [], "r");
           await fn.setqflist(denops, [], "a", {
-            title: `[Search results for ${pattern} on ${tool.cmd} path: ${expandCwd}]`,
+            title: `[Search results for ${pattern} on ${tool.cmd} path: ${expandDir}]`,
           });
           await denops.cmd("botright copen");
         });
@@ -171,7 +175,7 @@ export async function main(denops: Denops): Promise<void> {
           line = line.trim();
           const lsp = line.split("|");
           if (!path.isAbsolute(lsp[0])) {
-            const absolute = path.join(expandCwd, lsp[0]);
+            const absolute = path.join(expandDir, lsp[0]);
             line = [absolute, ...lsp.slice(1, -1)].join("|");
           }
           await fn.setqflist(denops, [], "a", { lines: [line] });

@@ -13,3 +13,7 @@ name = "pt"
 cmd = "pt"
 arg = ["-i", "--nogroup", "--nocolor"]
 
+[[tool]]
+name = "ugrep"
+cmd = "ugrep"
+arg = ["-RInk", "-j", "--tabs=1"]
