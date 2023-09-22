@@ -126,7 +126,7 @@ export async function main(denops: Denops): Promise<void> {
         );
         clog({ userArg });
 
-        const toolArg = _.uniq([...tool.arg, ...userArg].filter((x) => x));
+        const toolArg = [...tool.arg, ...userArg];
         const cmdArgs = ensure([...toolArg, pattern], is.ArrayOf(is.String));
         clog(`pid: ${p?.pid}`);
         try {
