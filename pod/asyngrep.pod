@@ -48,7 +48,7 @@ dvpm.add({ url: "yukimemi/dps-asyngrep" });
 
 =item [vim-denops/denops.vim: 🐜 An ecosystem of Vim/Neovim which allows developers to write cross-platform plugins in Deno](https://github.com/vim-denops/denops.vim)
 
-=item Some grep tools. rg, pt, jvgrep, etc.
+=item Some grep tools. rg, pt, jvgrep, ugrep etc.
 
 =head1 Usage X<asyngrep-usage>
 

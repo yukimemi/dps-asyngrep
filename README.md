@@ -34,7 +34,7 @@ dvpm.add({ url: "yukimemi/dps-asyngrep" });
 
 - [Deno - A modern runtime for JavaScript and TypeScript](https://deno.land/)
 - [vim-denops/denops.vim: 🐜 An ecosystem of Vim/Neovim which allows developers to write cross-platform plugins in Deno](https://github.com/vim-denops/denops.vim)
-- Some grep tools. rg, pt, jvgrep, etc.
+- Some grep tools. rg, pt, jvgrep, ugrep etc.
 # Usage 
 
 No special settings are required.
