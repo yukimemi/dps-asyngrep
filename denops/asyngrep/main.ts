@@ -155,8 +155,7 @@ export async function main(denops: Denops): Promise<void> {
 
         clog(`pid: ${p?.pid}`);
         await batch(denops, async (denops) => {
-          await fn.setqflist(denops, [], "r");
-          await fn.setqflist(denops, [], "a", {
+          await fn.setqflist(denops, [], " ", {
             title: `[Search results for ${pattern} on ${tool.cmd} path: ${expandDir}]`,
           });
           await denops.cmd("botright copen");
