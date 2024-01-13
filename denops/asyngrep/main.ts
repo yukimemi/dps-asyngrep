@@ -1,14 +1,14 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
-import * as flags from "https://deno.land/std@0.211.0/flags/mod.ts";
+import * as flags from "https://deno.land/std@0.212.0/flags/mod.ts";
 import * as fn from "https://deno.land/x/denops_std@v5.2.0/function/mod.ts";
-import * as fs from "https://deno.land/std@0.211.0/fs/mod.ts";
+import * as fs from "https://deno.land/std@0.212.0/fs/mod.ts";
 import * as helper from "https://deno.land/x/denops_std@v5.2.0/helper/mod.ts";
-import * as path from "https://deno.land/std@0.211.0/path/mod.ts";
-import * as toml from "https://deno.land/std@0.211.0/toml/mod.ts";
+import * as path from "https://deno.land/std@0.212.0/path/mod.ts";
+import * as toml from "https://deno.land/std@0.212.0/toml/mod.ts";
 import * as vars from "https://deno.land/x/denops_std@v5.2.0/variable/mod.ts";
 import type { Denops } from "https://deno.land/x/denops_std@v5.2.0/mod.ts";
-import { TextLineStream } from "https://deno.land/std@0.211.0/streams/mod.ts";
-import { abortable } from "https://deno.land/std@0.211.0/async/mod.ts";
+import { TextLineStream } from "https://deno.land/std@0.212.0/streams/mod.ts";
+import { abortable } from "https://deno.land/std@0.212.0/async/mod.ts";
 import { batch } from "https://deno.land/x/denops_std@v5.2.0/batch/mod.ts";
 import { ensure, is } from "https://deno.land/x/unknownutil@v3.13.0/mod.ts";
 
