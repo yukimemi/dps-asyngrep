@@ -10,7 +10,7 @@ import type { Denops } from "https://deno.land/x/denops_std@v6.4.0/mod.ts";
 import { TextLineStream } from "https://deno.land/std@0.222.1/streams/mod.ts";
 import { abortable } from "https://deno.land/std@0.222.1/async/mod.ts";
 import { batch } from "https://deno.land/x/denops_std@v6.4.0/batch/mod.ts";
-import { ensure, is } from "https://deno.land/x/unknownutil@v3.17.2/mod.ts";
+import { ensure, is } from "https://deno.land/x/unknownutil@v3.17.3/mod.ts";
 
 type Tool = {
   name: string;
