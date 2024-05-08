@@ -1,15 +1,15 @@
 import * as _ from "https://cdn.skypack.dev/lodash@4.17.21";
 import * as flags from "https://deno.land/std@0.224.0/flags/mod.ts";
-import * as fn from "https://deno.land/x/denops_std@v6.4.0/function/mod.ts";
+import * as fn from "https://deno.land/x/denops_std@v6.4.2/function/mod.ts";
 import * as fs from "https://deno.land/std@0.224.0/fs/mod.ts";
-import * as helper from "https://deno.land/x/denops_std@v6.4.0/helper/mod.ts";
+import * as helper from "https://deno.land/x/denops_std@v6.4.2/helper/mod.ts";
 import * as path from "https://deno.land/std@0.224.0/path/mod.ts";
 import * as toml from "https://deno.land/std@0.224.0/toml/mod.ts";
-import * as vars from "https://deno.land/x/denops_std@v6.4.0/variable/mod.ts";
-import type { Denops } from "https://deno.land/x/denops_std@v6.4.0/mod.ts";
+import * as vars from "https://deno.land/x/denops_std@v6.4.2/variable/mod.ts";
+import type { Denops } from "https://deno.land/x/denops_std@v6.4.2/mod.ts";
 import { TextLineStream } from "https://deno.land/std@0.224.0/streams/mod.ts";
 import { abortable } from "https://deno.land/std@0.224.0/async/mod.ts";
-import { batch } from "https://deno.land/x/denops_std@v6.4.0/batch/mod.ts";
+import { batch } from "https://deno.land/x/denops_std@v6.4.2/batch/mod.ts";
 import { ensure, is } from "https://deno.land/x/unknownutil@v3.18.0/mod.ts";
 
 type Tool = {
